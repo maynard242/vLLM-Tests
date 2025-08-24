@@ -1,16 +1,16 @@
 ==================================================
 Final Benchmark Summary on H100
 ==================================================
-Model: aisingapore/Gemma-SEA-LION-v4-27B-IT
-Average Time to First Token (TTFT): 0.0457 s
-Standard Deviation of TTFT:         0.0016 s
+Model: aisingapore/Gemma-SEA-LION-v4-27B-IT-NVFP4
+Average Time to First Token (TTFT): 0.0276 s
+Standard Deviation of TTFT:         0.0019 s
 --------------------------------------------------
-Average Tokens per Second:          28.57 t/s
+Average Tokens per Second:          62.43 t/s
 Standard Deviation of T/s:          0.08 t/s
 --------------------------------------------------
-Average GPU Utilization:            95.30%
-Standard Deviation of GPU Util:     1.62%
+Average GPU Utilization:            90.50%
+Standard Deviation of GPU Util:     1.12%
 --------------------------------------------------
-Average GPU Memory Used:            73.57 GB
+Average GPU Memory Used:            73.71 GB
 Standard Deviation of GPU Mem:      0.00 GB
 ==================================================
