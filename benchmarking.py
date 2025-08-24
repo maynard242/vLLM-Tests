@@ -4,6 +4,7 @@ import csv
 import numpy as np
 import pynvml # The NVIDIA Management Library for Python
 import argparse
+import sys
 
 # =============================================================================
 # VLLM API Benchmarking Script
@@ -168,6 +169,7 @@ Examples:
   python benchmark_script.py --model aisingapore/Gemma-SEA-LION-v3-9B-IT
   python benchmark_script.py --model meta-llama/Llama-2-7b-chat-hf --max-tokens 512 --num-runs 10
   python benchmark_script.py --model mistralai/Mistral-7B-Instruct-v0.1 --output custom_results.csv
+  python benchmark_script.py --model your-model --max-tokens 1024 --num-runs 3 --base-url http://your-server:8000/v1
         """
     )
     
@@ -208,9 +210,61 @@ Examples:
     
     return parser.parse_args()
 
-if __name__ == "__main__":
+def validate_arguments(args):
+    """
+    Validate command line arguments.
+    
+    Args:
+        args: Parsed command line arguments.
+        
+    Returns:
+        bool: True if arguments are valid, False otherwise.
+    """
+    # Check if model is specified
+    if not args.model:
+        print("❌ Model name is required!")
+        print("\nExample usage:")
+        print(f"  python {sys.argv[0]} --model \"aisingapore/Gemma-SEA-LION-v3-9B-IT\"")
+        print(f"  python {sys.argv[0]} --model \"meta-llama/Llama-2-7b-chat-hf\"")
+        print("\nUse --help for more options.")
+        return False
+
+    # Validate numeric arguments
+    if args.max_tokens <= 0:
+        print("❌ max-tokens must be positive")
+        return False
+        
+    if args.num_runs <= 0:
+        print("❌ num-runs must be positive")
+        return False
+
+    return True
+
+
+def main():
+    """Main function to orchestrate the benchmarking process."""
+    # Show help if no arguments provided
+    if len(sys.argv) == 1:
+        # Create parser and show help
+        parser = argparse.ArgumentParser(
+            description="Benchmark vLLM server performance with multilingual prompts",
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog="""
+Examples:
+  python benchmark_script.py --model aisingapore/Gemma-SEA-LION-v3-9B-IT
+  python benchmark_script.py --model meta-llama/Llama-2-7b-chat-hf --max-tokens 512 --num-runs 10
+  python benchmark_script.py --model mistralai/Mistral-7B-Instruct-v0.1 --output custom_results.csv
+            """
+        )
+        parser.print_help()
+        return
+    
     # Parse command line arguments
     args = parse_arguments()
+    
+    # Validate arguments
+    if not validate_arguments(args):
+        return
     
     # --- Client and Parameters ---
     client = openai.OpenAI(
@@ -270,3 +324,7 @@ if __name__ == "__main__":
         print("=" * 50)
     else:
         print("❌ No successful runs. Please check your VLLM server and parameters.")
+
+
+if __name__ == "__main__":
+    main()
