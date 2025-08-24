@@ -3,6 +3,7 @@ import openai
 import csv
 import numpy as np
 import pynvml # The NVIDIA Management Library for Python
+import argparse
 
 # =============================================================================
 # VLLM API Benchmarking Script
@@ -26,6 +27,9 @@ import pynvml # The NVIDIA Management Library for Python
 # - The 'numpy' library installed (`pip install numpy`).
 # - The 'pynvml' library installed (`pip install pynvml`).
 # - An NVIDIA GPU with the appropriate drivers.
+#
+# Usage:
+# python benchmark_script.py --model MODEL_NAME [--max-tokens MAX_TOKENS] [--num-runs NUM_RUNS] [--output OUTPUT_FILE]
 #
 # =============================================================================
 
@@ -150,18 +154,80 @@ def save_to_csv(filename: str, ttfts, generation_times, tokens_per_seconds, gpu_
 
     print(f"\n✅ Benchmark results saved to '{filename}'")
 
+def create_multilingual_prompt():
+    """Creates a multilingual prompt with alternating languages."""
+    return """Write a detailed technical explanation of the VLLM framework, in alternating sentences in English, Bahasa, Tamil, Vietnamese, Tagalog, Khmer, Malay, English, and continue this pattern throughout your response. Include its core components, the PagedAttention algorithm, and its benefits for serving large language models. The explanation should be suitable for a senior machine learning engineer and should touch upon memory efficiency, continuous batching, and CUDA kernel optimization."""
+
+def parse_arguments():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Benchmark vLLM server performance with multilingual prompts",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python benchmark_script.py --model aisingapore/Gemma-SEA-LION-v3-9B-IT
+  python benchmark_script.py --model meta-llama/Llama-2-7b-chat-hf --max-tokens 512 --num-runs 10
+  python benchmark_script.py --model mistralai/Mistral-7B-Instruct-v0.1 --output custom_results.csv
+        """
+    )
+    
+    parser.add_argument(
+        "--model", 
+        type=str, 
+        required=True,
+        help="Model name to benchmark (required)"
+    )
+    
+    parser.add_argument(
+        "--max-tokens", 
+        type=int, 
+        default=768,
+        help="Maximum number of tokens to generate (default: 768)"
+    )
+    
+    parser.add_argument(
+        "--num-runs", 
+        type=int, 
+        default=5,
+        help="Number of benchmark runs (default: 5)"
+    )
+    
+    parser.add_argument(
+        "--output", 
+        type=str, 
+        default="vllm_benchmark_results.csv",
+        help="Output CSV file name (default: vllm_benchmark_results.csv)"
+    )
+    
+    parser.add_argument(
+        "--base-url", 
+        type=str, 
+        default="http://localhost:8000/v1",
+        help="Base URL for the vLLM server (default: http://localhost:8000/v1)"
+    )
+    
+    return parser.parse_args()
+
 if __name__ == "__main__":
+    # Parse command line arguments
+    args = parse_arguments()
+    
     # --- Client and Parameters ---
     client = openai.OpenAI(
-        base_url="http://localhost:8000/v1",
+        base_url=args.base_url,
         api_key="not-needed"
     )
 
-    MODEL_NAME = "aisingapore/Gemma-SEA-LION-v3-9B-IT"
-    PROMPT = """Write an in-depth, technical explanation of the VLLM framework, including its core components, the PagedAttention algorithm, and its benefits for serving large language models. The explanation should be suitable for a senior machine learning engineer and should touch upon memory efficiency, continuous batching, and CUDA kernel optimization."""
-    MAX_TOKENS = 768
-    NUM_RUNS =  5
-    OUTPUT_FILE = "vllm_benchmark_results.csv"
+    MODEL_NAME = args.model
+    PROMPT = create_multilingual_prompt()
+    MAX_TOKENS = args.max_tokens
+    NUM_RUNS = args.num_runs
+    OUTPUT_FILE = args.output
+
+    print(f"Starting benchmark for model: {MODEL_NAME}")
+    print(f"Configuration: {MAX_TOKENS} max tokens, {NUM_RUNS} runs")
+    print(f"Output file: {OUTPUT_FILE}")
+    print("=" * 50)
 
     # --- Warm-up Run ---
     print("Performing a warm-up run to prepare the server...")
@@ -189,6 +255,7 @@ if __name__ == "__main__":
         print("\n" + "=" * 50)
         print("Final Benchmark Summary")
         print("=" * 50)
+        print(f"Model: {MODEL_NAME}")
         print(f"Average Time to First Token (TTFT): {avg_ttft:.4f} s")
         print(f"Standard Deviation of TTFT:         {std_ttft:.4f} s")
         print("-" * 50)
