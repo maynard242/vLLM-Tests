@@ -1,0 +1,16 @@
+==================================================
+Final Benchmark Summary on A100
+==================================================
+Model: aisingapore/Gemma-SEA-LION-v4-27B-IT
+Average Time to First Token (TTFT): 0.0503 s
+Standard Deviation of TTFT:         0.0013 s
+--------------------------------------------------
+Average Tokens per Second:          25.63 t/s
+Standard Deviation of T/s:          0.03 t/s
+--------------------------------------------------
+Average GPU Utilization:            96.80%
+Standard Deviation of GPU Util:     0.40%
+--------------------------------------------------
+Average GPU Memory Used:            73.80 GB
+Standard Deviation of GPU Mem:      0.00 GB
+==================================================
