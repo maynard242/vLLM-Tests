@@ -211,8 +211,8 @@ def list_models():
         return []
 
 
-def parse_arguments():
-    """Parse command line arguments."""
+def parse_arguments_parser():
+    """Create and return the argument parser (for help display)."""
     parser = argparse.ArgumentParser(
         description="Test vLLM chat completions API",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -272,6 +272,12 @@ Examples:
         help="List available models and exit"
     )
     
+    return parser
+
+
+def parse_arguments():
+    """Parse command line arguments."""
+    parser = parse_arguments_parser()
     return parser.parse_args()
 
 
@@ -285,8 +291,12 @@ def validate_arguments(args):
     Returns:
         bool: True if arguments are valid, False otherwise.
     """
-    # Validate model argument
-    if not args.list_models and not args.model:
+    # Skip validation if just listing models
+    if args.list_models:
+        return True
+        
+    # Validate model argument (only if not listing models)
+    if not args.model:
         print("❌ No model specified!")
         print("\nAttempting to list available models...")
         available = list_models()
@@ -321,18 +331,7 @@ def main():
     """Main function to orchestrate the chat API testing."""
     # Show help if no arguments provided
     if len(sys.argv) == 1:
-        # Create parser and show help
-        parser = argparse.ArgumentParser(
-            description="Test vLLM chat completions API",
-            formatter_class=argparse.RawDescriptionHelpFormatter,
-            epilog="""
-Examples:
-  python test_vllm_chat.py --model "aisingapore/Gemma-SEA-LION-v3-9B-IT"
-  python test_vllm_chat.py -m "meta-llama/Llama-2-7b-chat-hf" --message "Hello, who are you?"
-  python test_vllm_chat.py --list-models
-  python test_vllm_chat.py --model "mistralai/Mistral-7B-Instruct-v0.1" --max-tokens 256 --temperature 0.8
-            """
-        )
+        parser = parse_arguments_parser()
         parser.print_help()
         return
     
