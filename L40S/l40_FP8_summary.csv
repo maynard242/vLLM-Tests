@@ -1,0 +1,16 @@
+==================================================
+Final Benchmark Summary on L40S
+==================================================
+Model: aisingapore/Gemma-SEA-LION-v4-27B-IT-FP8-Dynamic
+Average Time to First Token (TTFT): 0.0549 s
+Standard Deviation of TTFT:         0.0012 s
+--------------------------------------------------
+Average Tokens per Second:          21.26 t/s
+Standard Deviation of T/s:          0.00 t/s
+--------------------------------------------------
+Average GPU Utilization:            96.90%
+Standard Deviation of GPU Util:     0.30%
+--------------------------------------------------
+Average GPU Memory Used:            42.29 GB
+Standard Deviation of GPU Mem:      0.00 GB
+==================================================
